@@ -1,21 +1,52 @@
 
+// Load environment variables
+require("dotenv").config();
+
+// Import packages
 const express = require("express");
+const connectDB = require("./config/db");
+const taskRoutes = require("./routes/taskRoutes");
 
 // Create Express application
 const app = express();
 
-// Port number
-const PORT = 5000;
+// Set server port
+const PORT = process.env.PORT || 5000;
 
-// Middleware to read JSON data
+// Middleware
 app.use(express.json());
 
-// Home route
+// Home API
 app.get("/", (req, res) => {
-    res.send("Employee Backend API is running!");
+    res.status(200).send("Employee Backend API is running!");
 });
 
-// Start server
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+// Test API
+app.get("/test", (req, res) => {
+    res.status(200).send("Task routes are being tested!");
 });
+
+// Connect Task Routes (Only once)
+app.use("/api/tasks", taskRoutes);
+
+// Start Server
+const startServer = async () => {
+    try {
+        // Connect MongoDB
+        await connectDB();
+
+        // Start Express server
+        app.listen(PORT, () => {
+            console.log("MongoDB connected successfully!");
+            console.log(`Server running on port ${PORT}`);
+        });
+
+    } catch (error) {
+        console.log("Server startup failed:", error.message);
+        process.exit(1);
+    }
+};
+
+// Run server
+startServer();
+
